@@ -1,0 +1,25 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model LinkedDevice {
+  id                 String   @id @default(uuid())
+  userId             String   @map("user_id")
+  authToken          String   @map("auth_token")
+  code               String
+  deviceName         String   @map("device_name")
+  browserName        String   @map("browser_name")
+  fullBrowserVersion String   @map("full_browser_version")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @default(now()) @map("updated_at")
+
+  @@map("linked_device")
+}
