@@ -1,23 +1,102 @@
 "use client";
-import Image from "next/image";
+
 import styles from "./page.module.css";
-import { QRCode } from "react-qrcode-logo";
-import { osName, browserName } from "react-device-detect";
+import {
+  browserName,
+  osName,
+  isBrowser,
+  isDesktop,
+  fullBrowserVersion,
+} from "react-device-detect";
 import { useEffect, useState } from "react";
-import { v4 as uuid } from "uuid";
+import { QrCodeRenderTag } from "./components";
 
 export default function Home() {
   const [qrCode, setQrCode] = useState("");
+  const [codeValidation, setCodeValidation] = useState("");
 
-  useEffect(() => {
-    if (qrCode) {
-      setTimeout(() => {
-        setQrCode(uuid());
-      }, 30000);
+  const handleQrCodeGenerate = async () => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/sign`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "insomnia/8.4.0",
+      },
+      body: JSON.stringify({
+        browserName,
+        deviceName: osName,
+        fullBrowserVersion,
+      }),
+    });
+
+    const data = await response.json();
+    return {
+      token: data.token,
+      code: data.code,
+    };
+  };
+
+  const handleConsultCodeGenerate = async (code: string) => {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/linked-device/${code}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "User-Agent": "insomnia/8.4.0",
+        },
+        next: {
+          revalidate: 4,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.error) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  const handleFetch = async (check: boolean) => {
+    if (check) {
+      const valid = await handleConsultCodeGenerate(codeValidation);
+      if (valid) {
+        console.log("redirect");
+        return;
+      }
+
+      const { token, code } = await handleQrCodeGenerate();
+      setQrCode(token);
+      setCodeValidation(code);
       return;
     }
 
-    setQrCode(uuid());
+    const { token, code } = await handleQrCodeGenerate();
+    setQrCode(token);
+    setCodeValidation(code);
+  };
+
+  const handleQrCodeRender = () => {
+    if (isBrowser && isDesktop && qrCode) {
+      return <QrCodeRenderTag value={qrCode} />;
+    }
+
+    return <></>;
+  };
+
+  useEffect(() => {
+    if (!qrCode) {
+      handleFetch(false);
+    } else {
+      const interval = setInterval(() => {
+        handleFetch(true);
+      }, 4000);
+
+      return () => clearInterval(interval);
+    }
   }, [qrCode]);
 
   return (
@@ -45,16 +124,7 @@ export default function Home() {
               dashboard.
             </p>
           </div>
-          <div className={styles.qrCode}>
-            <QRCode
-              value={qrCode + " - " + osName + " - " + browserName}
-              logoImage="https://static.wixstatic.com/media/c93dac_70e290cddaaa47e38d28e64a85e5c6c5~mv2.png/v1/fill/w_240,h_240,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Perfil-01%202.png"
-              logoWidth={50}
-              logoHeight={50}
-              size={200}
-              qrStyle="dots"
-            />
-          </div>
+          <div className={styles.qrCode}>{handleQrCodeRender()}</div>
         </div>
       </div>
     </main>

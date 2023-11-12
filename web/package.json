@@ -14,14 +14,12 @@
     "react-device-detect": "^2.2.3",
     "react-dom": "^18",
     "react-qr-code": "^2.0.12",
-    "react-qrcode-logo": "^2.9.0",
-    "uuid": "^9.0.1"
+    "react-qrcode-logo": "^2.9.0"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "@types/uuid": "^9.0.7",
     "eslint": "^8",
     "eslint-config-next": "14.0.2",
     "typescript": "^5"
