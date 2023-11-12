@@ -10,7 +10,7 @@ function LinkedDevicesScreen() {
     data: "",
     date: "",
   });
-  const [linkedDevices, setLinkedDevices] = useState<string[]>([]);
+  const [linkedDevices, setLinkedDevices] = useState<string>();
 
   useEffect(() => {
     (async () => {
@@ -25,13 +25,52 @@ function LinkedDevicesScreen() {
     setAddDevice(!addDevice);
   };
 
-  const handleBarCodeScanned = ({ type, data }: any) => {
+  const handleBarCodeScanned = async ({ data = "" }) => {
+    setAddDevice(false);
+
+    const tokenDecode = await fetch(
+      `${process.env.EXPO_PUBLIC_API_URL}/decode`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "User-Agent": "insomnia/8.4.0",
+        },
+        body: `{
+        "token": "${data}"
+      }`,
+      }
+    );
+
+    const tokenDecodeJson = (await tokenDecode.json()) as {
+      code: string;
+      browserName: string;
+      deviceName: string;
+      fullBrowserVersion: string;
+    };
+
+    await fetch(`${process.env.EXPO_PUBLIC_API_URL}/linked-device`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "insomnia/8.4.0",
+      },
+      body: `{
+        "code": "${tokenDecodeJson.code}",
+        "authToken": "${data}",
+        "browserName": "${tokenDecodeJson.browserName}",
+        "deviceName": "${tokenDecodeJson.deviceName}",
+        "fullBrowserVersion": "${tokenDecodeJson.fullBrowserVersion}",
+        "userId": "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
+      }`,
+    });
+
     setScannedData({
-      data: data,
+      data: `${tokenDecodeJson.deviceName} - ${tokenDecodeJson.browserName}`,
       date: new Date().toLocaleString(),
     });
-    setAddDevice(false);
-    setLinkedDevices([...linkedDevices, scannedData.data]);
+
+    setLinkedDevices(scannedData.data);
   };
 
   return (
@@ -65,7 +104,7 @@ function LinkedDevicesScreen() {
         <View style={styles.body}>
           <View style={styles.addDevice}>
             <Text style={styles.textWhite}>
-              {linkedDevices.length} of 1 devices linked
+              {linkedDevices ? "1" : "0"} of 1 devices linked
             </Text>
             <TouchableOpacity
               style={styles.addDeviceButton}
@@ -77,7 +116,11 @@ function LinkedDevicesScreen() {
           <View style={styles.linkedDevices}>
             <Text style={styles.textWhite}>Linked Devices</Text>
             <View style={styles.linkedDevice}>
-              <View style={styles.circle}></View>
+              {linkedDevices ? (
+                <View style={styles.circleActive} />
+              ) : (
+                <View style={styles.circleInactive} />
+              )}
               <View>
                 <Text style={styles.textWhite}>
                   {scannedData.data || "No Device Linked"}

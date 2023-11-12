@@ -46,11 +46,20 @@ export const styles = StyleSheet.create({
     gap: 20,
     alignItems: "center",
   },
-  circle: {
+  circleActive: {
     width: 60,
     height: 60,
     borderRadius: 30,
     borderColor: "#00A884",
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  circleInactive: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderColor: "#707070",
     borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
