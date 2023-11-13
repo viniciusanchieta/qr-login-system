@@ -10,24 +10,30 @@ import {
 } from "react-device-detect";
 import { useEffect, useState } from "react";
 import { QrCodeRenderTag } from "./components";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [qrCode, setQrCode] = useState("");
   const [codeValidation, setCodeValidation] = useState("");
 
+  const router = useRouter();
+
   const handleQrCodeGenerate = async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/sign`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "User-Agent": "insomnia/8.4.0",
-      },
-      body: JSON.stringify({
-        browserName,
-        deviceName: osName,
-        fullBrowserVersion,
-      }),
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/linked-device/sign`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "User-Agent": "insomnia/8.4.0",
+        },
+        body: JSON.stringify({
+          browserName,
+          deviceName: osName,
+          fullBrowserVersion,
+        }),
+      }
+    );
 
     const data = await response.json();
     return {
@@ -56,25 +62,14 @@ export default function Home() {
     if (data.error) {
       return false;
     } else {
+      localStorage.setItem("userId", data.userId);
       return true;
     }
   };
 
-  const handleFetch = async (check: boolean) => {
-    if (check) {
-      const valid = await handleConsultCodeGenerate(codeValidation);
-      if (valid) {
-        console.log("redirect");
-        return;
-      }
-
-      const { token, code } = await handleQrCodeGenerate();
-      setQrCode(token);
-      setCodeValidation(code);
-      return;
-    }
-
+  const handleFetchQrCodeRender = async () => {
     const { token, code } = await handleQrCodeGenerate();
+
     setQrCode(token);
     setCodeValidation(code);
   };
@@ -87,15 +82,30 @@ export default function Home() {
     return <></>;
   };
 
+  const handleFetchConsultCodeGenerate = async () => {
+    const valid = await handleConsultCodeGenerate(codeValidation);
+    if (valid) {
+      router.push("/dashboard");
+      return;
+    }
+  };
+
   useEffect(() => {
     if (!qrCode) {
-      handleFetch(false);
+      handleFetchQrCodeRender();
     } else {
-      const interval = setInterval(() => {
-        handleFetch(true);
-      }, 4000);
+      const intervalRender = setInterval(() => {
+        handleFetchQrCodeRender();
+      }, 10000);
 
-      return () => clearInterval(interval);
+      const intervalConsult = setInterval(() => {
+        handleFetchConsultCodeGenerate();
+      }, 3333);
+
+      return () => {
+        clearInterval(intervalRender);
+        clearInterval(intervalConsult);
+      };
     }
   }, [qrCode]);
 
