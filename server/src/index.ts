@@ -21,7 +21,7 @@ server.register(cors, {
   methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
 });
 
-server.get("/linked-device/:code", async (request, reply) => {
+server.get("/api/v1/linked-device/:code", async (request, reply) => {
   const query = request.params as { code: string };
 
   const linkedDevices = await prisma.linkedDevice.findFirst({
@@ -39,7 +39,7 @@ server.get("/linked-device/:code", async (request, reply) => {
   reply.status(404).send({ error: "Not Found" });
 });
 
-server.post("/decode", async (request, reply) => {
+server.post("/api/v1/decode", async (request, reply) => {
   const body = request.body as { token: string };
   const token = body.token;
 
@@ -48,7 +48,7 @@ server.post("/decode", async (request, reply) => {
   reply.status(200).send(decodeToken);
 });
 
-server.post("/sign", async (request, reply) => {
+server.post("/api/v1/linked-device/sign", async (request, reply) => {
   const codeGenerate = uuid();
   const body = request.body as {
     deviceName: string;
@@ -69,7 +69,7 @@ server.post("/sign", async (request, reply) => {
   });
 });
 
-server.post("/linked-device", async (request, reply) => {
+server.post("/api/v1/linked-device", async (request, reply) => {
   const body = request.body as {
     code: string;
     userId: string;
@@ -107,6 +107,25 @@ server.post("/linked-device", async (request, reply) => {
   });
 
   reply.status(201).send(linkedDevice);
+});
+
+server.post("/api/v1/linked-device/user", async (request, reply) => {
+  const body = request.body as {
+    userId: string;
+    deviceName: string;
+    browserName: string;
+    fullBrowserVersion: string;
+  };
+
+  const linkedDevices = await prisma.linkedDevice.findFirst({
+    where: body,
+  });
+
+  if (linkedDevices) {
+    return reply.status(200).send(linkedDevices);
+  }
+
+  reply.status(404).send({ error: "Not Found" });
 });
 
 server.listen({ port: 8080, host: "0.0.0.0" }, (err, address) => {
