@@ -72,4 +72,12 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  deleteDeviceButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fa5757",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+  },
 });

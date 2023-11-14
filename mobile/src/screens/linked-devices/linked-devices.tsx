@@ -10,7 +10,9 @@ function LinkedDevicesScreen() {
     data: "",
     date: "",
   });
-  const [linkedDevices, setLinkedDevices] = useState<string>();
+  const [linkedDevices, setLinkedDevices] = useState(false);
+
+  const userId = "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed";
 
   useEffect(() => {
     (async () => {
@@ -55,22 +57,38 @@ function LinkedDevicesScreen() {
         "Content-Type": "application/json",
         "User-Agent": "insomnia/8.4.0",
       },
-      body: `{
-        "code": "${tokenDecodeJson.code}",
-        "authToken": "${data}",
-        "browserName": "${tokenDecodeJson.browserName}",
-        "deviceName": "${tokenDecodeJson.deviceName}",
-        "fullBrowserVersion": "${tokenDecodeJson.fullBrowserVersion}",
-        "userId": "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
-      }`,
+      body: JSON.stringify({
+        code: tokenDecodeJson.code,
+        authToken: data,
+        browserName: tokenDecodeJson.browserName,
+        deviceName: tokenDecodeJson.deviceName,
+        fullBrowserVersion: tokenDecodeJson.fullBrowserVersion,
+        userId,
+      }),
     });
+
+    setLinkedDevices(true);
 
     setScannedData({
       data: `${tokenDecodeJson.deviceName} - ${tokenDecodeJson.browserName}`,
       date: new Date().toLocaleString(),
     });
+  };
 
-    setLinkedDevices(scannedData.data);
+  const handleDeleteDevice = async () => {
+    await fetch(`${process.env.EXPO_PUBLIC_API_URL}/linked-device/${userId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "insomnia/8.4.0",
+      },
+    });
+
+    setLinkedDevices(false);
+    setScannedData({
+      data: "",
+      date: "",
+    });
   };
 
   return (
@@ -129,6 +147,14 @@ function LinkedDevicesScreen() {
                   {scannedData.date || "No Date"}
                 </Text>
               </View>
+              {linkedDevices && (
+                <TouchableOpacity
+                  style={styles.deleteDeviceButton}
+                  onPress={handleDeleteDevice}
+                >
+                  <Text style={styles.textWhite}>Delete</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </View>
