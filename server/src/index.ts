@@ -85,8 +85,25 @@ server.post("/api/v1/linked-device", async (request, reply) => {
     },
   });
 
-  const linkedDevice = await prisma.linkedDevice.upsert({
-    create: {
+  if (consultLinkedDevice) {
+    await prisma.linkedDevice.update({
+      where: {
+        id: consultLinkedDevice.id,
+      },
+      data: {
+        code: body.code,
+        authToken: body.authToken,
+        deviceName: body.deviceName,
+        browserName: body.browserName,
+        fullBrowserVersion: body.fullBrowserVersion,
+      },
+    });
+
+    return reply.status(200).send(consultLinkedDevice);
+  }
+
+  await prisma.linkedDevice.create({
+    data: {
       code: body.code,
       userId: body.userId,
       authToken: body.authToken,
@@ -94,19 +111,32 @@ server.post("/api/v1/linked-device", async (request, reply) => {
       browserName: body.browserName,
       fullBrowserVersion: body.fullBrowserVersion,
     },
-    update: {
-      code: body.code,
-      authToken: body.authToken,
-      deviceName: body.deviceName,
-      browserName: body.browserName,
-      fullBrowserVersion: body.fullBrowserVersion,
-    },
-    where: {
-      id: consultLinkedDevice?.id,
-    },
   });
 
-  reply.status(201).send(linkedDevice);
+  reply.status(201).send(body);
+
+  // const linkedDevice = await prisma.linkedDevice.upsert({
+  //   create: {
+  //     code: body.code,
+  //     userId: body.userId,
+  //     authToken: body.authToken,
+  //     deviceName: body.deviceName,
+  //     browserName: body.browserName,
+  //     fullBrowserVersion: body.fullBrowserVersion,
+  //   },
+  //   update: {
+  //     code: body.code,
+  //     authToken: body.authToken,
+  //     deviceName: body.deviceName,
+  //     browserName: body.browserName,
+  //     fullBrowserVersion: body.fullBrowserVersion,
+  //   },
+  //   where: {
+  //     id: consultLinkedDevice?.id,
+  //   },
+  // });
+
+  // reply.status(201).send(linkedDevice);
 });
 
 server.post("/api/v1/linked-device/user", async (request, reply) => {
@@ -123,6 +153,28 @@ server.post("/api/v1/linked-device/user", async (request, reply) => {
 
   if (linkedDevices) {
     return reply.status(200).send(linkedDevices);
+  }
+
+  reply.status(404).send({ error: "Not Found" });
+});
+
+server.delete("/api/v1/linked-device/:userId", async (request, reply) => {
+  const query = request.params as { userId: string };
+
+  const linkedDevice = await prisma.linkedDevice.findFirst({
+    where: {
+      userId: query.userId,
+    },
+  });
+
+  if (linkedDevice) {
+    await prisma.linkedDevice.delete({
+      where: {
+        id: linkedDevice.id,
+      },
+    });
+
+    return reply.status(204).send();
   }
 
   reply.status(404).send({ error: "Not Found" });
