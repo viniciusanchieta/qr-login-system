@@ -96,11 +96,11 @@ export default function Home() {
     } else {
       const intervalRender = setInterval(() => {
         handleFetchQrCodeRender();
-      }, 10000);
+      }, 60000);
 
       const intervalConsult = setInterval(() => {
         handleFetchConsultCodeGenerate();
-      }, 3333);
+      }, 4000);
 
       return () => {
         clearInterval(intervalRender);
