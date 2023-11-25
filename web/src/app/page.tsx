@@ -113,19 +113,19 @@ export default function Home() {
     <main className={styles.main}>
       <header className={styles.header}>
         <img
-          src="https://rendaextraton.com.br/wp-content/uploads/2021/08/Logo_ton_white.png"
+          src="https://user-images.githubusercontent.com/31235308/233757148-892564b0-b452-4b48-9875-d656f0baba19.png"
           alt="logo"
           width={50}
           className={styles.logo}
         />
-        <p className={styles.title}>Ton na mão</p>
+        <p className={styles.title}>QR Code login system</p>
       </header>
       <div className={styles.body}>
-        <p className={styles.titleAuth}>Use app Ton on your smartphone</p>
+        <p className={styles.titleAuth}>Use app on your smartphone</p>
         <div className={styles.auth}>
           <div className={styles.steps}>
             <ul>
-              <li>1. Open Ton on your smartphone</li>
+              <li>1. Open on your smartphone</li>
               <li>2. Click on the Add device button</li>
               <li>3. Scan the QR code</li>
             </ul>

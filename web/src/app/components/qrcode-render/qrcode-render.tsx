@@ -6,11 +6,11 @@ function QrCodeRenderComponent({ value }: { value: string }) {
   return (
     <QRCode
       value={value}
-      logoImage="https://github.com/viniciusanchieta/viniciusanchieta.dev/assets/31235308/2854a3d1-c8d8-4d52-8454-21bff6271380"
-      logoWidth={50}
-      logoHeight={50}
+      logoImage="https://user-images.githubusercontent.com/31235308/233757148-892564b0-b452-4b48-9875-d656f0baba19.png"
+      logoWidth={60}
+      logoHeight={45}
       size={200}
-      qrStyle="dots"
+      qrStyle="squares"
     />
   );
 }
