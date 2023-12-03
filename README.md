@@ -35,9 +35,9 @@ The project aims to create a seamless authentication experience where users can 
 
 ## Project Structure
 
-- `web/`: Contains the Next.js web application code.
-- `mobile/`: Houses the React Native mobile app developed with Expo.
-- `server/`: Holds the Fastify server code, integrating Prisma for database operations.
+- `web`: Contains the Next.js web application code.
+- `mobile`: Houses the React Native mobile app developed with Expo.
+- `server`: Holds the Fastify server code, integrating Prisma for database operations.
 
 ## How It Works
 
